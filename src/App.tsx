@@ -37,12 +37,29 @@ type ContactLink = {
 
 const easeOut = [0.22, 1, 0.36, 1] as const
 
-function navigateToSection(id: string, behavior: ScrollBehavior) {
-  const nextHash = `#${id}`
-  if (window.location.hash !== nextHash) {
-    window.history.pushState(null, '', nextHash)
-  }
+function getHistorySection() {
+  const state = window.history.state
+  return state && typeof state === 'object' && typeof state.section === 'string'
+    ? state.section
+    : null
+}
 
+function setSectionHistory(id: string, replace = false) {
+  const currentSection = getHistorySection()
+  const url = `${window.location.pathname}${window.location.search}`
+
+  if (currentSection === id && !window.location.hash) return
+
+  const state = Object.assign({}, window.history.state, { section: id })
+  if (replace || currentSection === id) {
+    window.history.replaceState(state, '', url)
+  } else {
+    window.history.pushState(state, '', url)
+  }
+}
+
+function navigateToSection(id: string, behavior: ScrollBehavior) {
+  setSectionHistory(id)
   document.getElementById(id)?.scrollIntoView({ behavior, block: 'start' })
 }
 
@@ -329,21 +346,25 @@ function App() {
   useEffect(() => {
     if (welcomeVisible) return
 
-    const syncFromHash = () => {
-      const id = window.location.hash.replace('#', '') || 'home'
+    const syncFromNavigation = () => {
+      const requestedId = window.location.hash.slice(1) || getHistorySection() || 'home'
+      const id = document.getElementById(requestedId) ? requestedId : 'home'
       const section = document.getElementById(id)
       if (section) {
+        if (window.location.hash || !getHistorySection()) {
+          setSectionHistory(id, true)
+        }
         navigationIntent.current = id
         requestAnimationFrame(() => section.scrollIntoView({ behavior: 'instant', block: 'start' }))
       }
     }
 
-    syncFromHash()
-    window.addEventListener('hashchange', syncFromHash)
-    window.addEventListener('popstate', syncFromHash)
+    syncFromNavigation()
+    window.addEventListener('hashchange', syncFromNavigation)
+    window.addEventListener('popstate', syncFromNavigation)
     return () => {
-      window.removeEventListener('hashchange', syncFromHash)
-      window.removeEventListener('popstate', syncFromHash)
+      window.removeEventListener('hashchange', syncFromNavigation)
+      window.removeEventListener('popstate', syncFromNavigation)
     }
   }, [welcomeVisible])
 
@@ -401,9 +422,7 @@ function App() {
             scene.classList.add('transition-complete')
             setPortfolioTransitionComplete(true)
             if (navigationIntent.current && navigationIntent.current !== 'portfolio') return
-            if (window.location.hash !== '#portfolio') {
-              window.history.pushState(null, '', '#portfolio')
-            }
+            setSectionHistory('portfolio')
             setActiveSection('portfolio')
             document.getElementById('portfolio')?.scrollIntoView({
               behavior: 'instant',
@@ -602,9 +621,7 @@ function App() {
         return
       }
 
-      if (window.location.hash !== '#portfolio') {
-        window.history.pushState(null, '', '#portfolio')
-      }
+      setSectionHistory('portfolio')
 
       const portfolio = document.getElementById('portfolio')
       if (portfolio) {
@@ -709,7 +726,7 @@ function App() {
                 <MagneticButton href="#portfolio" variant="primary" onClick={() => handleNavClick('portfolio')}>
                   Explore Portfolio <ArrowRight size={16} />
                 </MagneticButton>
-                <MagneticButton href="#contact" variant="secondary">
+                <MagneticButton href="#contact" variant="secondary" onClick={() => handleNavClick('contact')}>
                   Get in Touch
                 </MagneticButton>
               </div>
