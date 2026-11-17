@@ -2046,6 +2046,11 @@ ul {
     grid-template-columns: 1fr;
     justify-items: center;
   }
+
+  .hero-copy,
+  .hero-visual {
+    min-width: 0;
+  }
 }
 
 @media (max-width: 800px) {
@@ -2134,24 +2139,104 @@ ul {
     width: 100%;
   }
 
+  .hero-copy,
+  .hero-title,
+  .hero-line {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .hero-title {
+    font-size: clamp(2.35rem, 10vw, 3.25rem);
+  }
+
+  .hero-line {
+    gap: 0.12em;
+  }
+
   .magnetic-button {
     width: 100%;
   }
 
+  .device-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .grid-panel {
+    min-height: 110px;
+    padding: 10px;
+    border-radius: 14px;
+  }
+
+  .device-readout {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .device-readout div {
+    padding: 10px 12px;
+  }
+
+  .about-stages {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .about-stage {
+    min-width: 0;
+  }
+
+  .portfolio-selector {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .portfolio-tab {
+    min-width: 0;
+    width: 100%;
+    padding: 10px 6px;
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .portfolio-tab:last-child {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: 50%;
+  }
+
   .contact-value {
     text-align: left;
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
 
   .contact-item {
-    grid-template-columns: auto 1fr;
+    grid-template-columns: 38px minmax(0, 1fr);
+    min-width: 0;
   }
 
   .contact-value {
     grid-column: 2;
   }
 
+  .contact-links {
+    min-width: 0;
+  }
+
   .achievement-content {
     padding: 0 0 0 14px;
+  }
+
+  .certificate-visual-large {
+    height: min(44vh, 360px);
+    min-height: 200px;
   }
 }
 
