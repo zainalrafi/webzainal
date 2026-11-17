@@ -229,11 +229,13 @@ function App() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [selectedCertificate, setSelectedCertificate] = useState<(typeof certificates)[number] | null>(null)
   const [portfolioCategory, setPortfolioCategory] = useState<'projects' | 'achievements' | 'certificates'>('projects')
+  const educationTimeline = useRef<HTMLDivElement | null>(null)
   const portfolioScene = useRef<HTMLElement | null>(null)
   const portfolioTransitionWord = useRef<HTMLHeadingElement | null>(null)
   const portfolioTransitionImpact = useRef<HTMLDivElement | null>(null)
   const portfolioSceneCompleted = useRef(false)
   const navigationIntent = useRef<string | null>(null)
+  const sectionRestoreComplete = useRef(false)
   const [welcomeVisible, setWelcomeVisible] = useState(
     () => !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   )
@@ -251,6 +253,24 @@ function App() {
       const total = document.body.scrollHeight - window.innerHeight
       const nextProgress = total > 0 ? (window.scrollY / total) * 100 : 0
       setScrollProgress(nextProgress)
+
+      if (!sectionRestoreComplete.current) return
+
+      const referenceY = Math.max(110, window.innerHeight * 0.3)
+      const transitionBounds = portfolioScene.current?.getBoundingClientRect()
+      const sectionId = transitionBounds
+        && transitionBounds.top <= referenceY
+        && transitionBounds.bottom > referenceY
+        ? 'portfolio'
+        : Array.from(document.querySelectorAll<HTMLElement>('section[id]'))
+          .find((section) => {
+            const bounds = section.getBoundingClientRect()
+            return bounds.top <= referenceY && bounds.bottom > referenceY
+          })?.id
+
+      if (!sectionId) return
+      if (navigationIntent.current === sectionId) navigationIntent.current = null
+      setSectionHistory(sectionId, true)
     }
 
     handleScroll()
@@ -347,6 +367,7 @@ function App() {
     if (welcomeVisible) return
 
     const syncFromNavigation = () => {
+      sectionRestoreComplete.current = false
       const requestedId = window.location.hash.slice(1) || getHistorySection() || 'home'
       const id = document.getElementById(requestedId) ? requestedId : 'home'
       const section = document.getElementById(id)
@@ -355,7 +376,10 @@ function App() {
           setSectionHistory(id, true)
         }
         navigationIntent.current = id
-        requestAnimationFrame(() => section.scrollIntoView({ behavior: 'instant', block: 'start' }))
+        requestAnimationFrame(() => {
+          section.scrollIntoView({ behavior: 'instant', block: 'start' })
+          sectionRestoreComplete.current = true
+        })
       }
     }
 
@@ -484,23 +508,121 @@ function App() {
         },
       )
 
-      const educationLine = document.querySelector('.education-timeline')
-      if (educationLine) {
-        gsap.to(educationLine, {
-          '--timeline-progress': '1',
-          ease: 'none',
-          scrollTrigger: {
-            trigger: '#education',
-            start: 'top 70%',
-            end: 'bottom 30%',
-            scrub: true,
-          },
-        })
-      }
-
     }, appRef)
 
     return () => ctx.revert()
+  }, [reducedMotion])
+
+  useLayoutEffect(() => {
+    const stage = educationTimeline.current
+    if (!stage || reducedMotion) return
+
+    const desktopQuery = window.matchMedia('(min-width: 1025px)')
+    const scrollTrack = stage.closest<HTMLElement>('.education-scroll-track')
+    const cards = Array.from(stage.querySelectorAll<HTMLElement>('.timeline-card'))
+    const steps = Array.from(stage.querySelectorAll<HTMLElement>('.education-rail-step'))
+    const railFill = stage.querySelector<HTMLElement>('.education-rail-fill')
+    const currentStep = stage.querySelector<HTMLElement>('[data-education-current]')
+    if (cards.length === 0) return
+
+    let context: gsap.Context | undefined
+    const updateProgress = (progress: number) => {
+      const activeIndex = Math.min(cards.length - 1, Math.floor(progress * cards.length))
+      steps.forEach((step, index) => {
+        step.classList.toggle('is-active', index === activeIndex)
+        step.classList.toggle('is-past', index < activeIndex)
+      })
+      if (currentStep) currentStep.textContent = String(activeIndex + 1).padStart(2, '0')
+      if (railFill) gsap.set(railFill, { scaleY: progress })
+    }
+
+    const initializeTimeline = () => {
+      context?.revert()
+      context = undefined
+      stage.classList.remove('is-sticky')
+
+      if (desktopQuery.matches && scrollTrack && cards.length > 1) {
+        stage.classList.add('is-sticky')
+        context = gsap.context(() => {
+          gsap.set(cards, {
+            autoAlpha: 0,
+            y: 48,
+            rotateX: -8,
+            scale: 0.94,
+            transformOrigin: '50% 100%',
+          })
+          gsap.set(cards[0], { autoAlpha: 1, y: 0, rotateX: 0, scale: 1 })
+          updateProgress(0)
+
+          const timeline = gsap.timeline({
+            scrollTrigger: {
+              trigger: scrollTrack,
+              start: 'top 110px',
+              end: () => `+=${window.innerHeight * (cards.length - 1)}`,
+              scrub: 0.8,
+              invalidateOnRefresh: true,
+              onUpdate: (self) => updateProgress(self.progress),
+              onRefresh: (self) => updateProgress(self.progress),
+            },
+          })
+
+          cards.slice(0, -1).forEach((card, index) => {
+            const transitionAt = index + 0.68
+            timeline.to(card, {
+              autoAlpha: 0,
+              y: -34,
+              rotateX: 7,
+              scale: 0.97,
+              duration: 0.32,
+              ease: 'power2.in',
+            }, transitionAt)
+            timeline.fromTo(cards[index + 1], {
+              autoAlpha: 0,
+              y: 42,
+              rotateX: -8,
+              scale: 0.94,
+            }, {
+              autoAlpha: 1,
+              y: 0,
+              rotateX: 0,
+              scale: 1,
+              duration: 0.38,
+              ease: 'power3.out',
+            }, transitionAt)
+          })
+        }, stage)
+      } else {
+        context = gsap.context(() => {
+          cards.forEach((card) => {
+            gsap.fromTo(card, {
+              autoAlpha: 0,
+              y: 32,
+              rotateX: -5,
+            }, {
+              autoAlpha: 1,
+              y: 0,
+              rotateX: 0,
+              duration: 0.7,
+              ease: 'power3.out',
+              scrollTrigger: {
+                trigger: card,
+                start: 'top 82%',
+                once: true,
+              },
+            })
+          })
+        }, stage)
+      }
+    }
+
+    initializeTimeline()
+    desktopQuery.addEventListener('change', initializeTimeline)
+
+    return () => {
+      desktopQuery.removeEventListener('change', initializeTimeline)
+      context?.revert()
+      stage.classList.remove('is-sticky')
+    }
   }, [reducedMotion])
 
   useLayoutEffect(() => {
@@ -656,15 +778,6 @@ function App() {
 
       <header className="site-header" inert={welcomeVisible} aria-hidden={welcomeVisible}>
         <nav className="site-nav" aria-label="Main navigation">
-          <button
-            type="button"
-            className="brand-mark"
-            onClick={() => handleNavClick('home')}
-            aria-label="Go to home section"
-          >
-            ZR
-          </button>
-
           <div className={`nav-menu ${mobileMenuOpen ? 'open' : ''}`}>
             {navigationItems.map((item) => (
               <button
@@ -831,6 +944,86 @@ function App() {
               </div>
             </div>
           </motion.div>
+
+          <section className="about-subsection education-section">
+            <SectionHeading
+              eyebrow="Education"
+              title="A timeline of learning and growth."
+              description="The timeline keeps the background honest and structured without inventing unsupported details."
+            />
+
+            <div
+              className="education-scroll-track"
+              style={reducedMotion
+                ? undefined
+                : { height: `calc(${Math.max(education.length - 1, 1) * 100}vh + clamp(360px, 62vh, 560px))` }}
+            >
+              <div className="education-timeline" ref={educationTimeline}>
+                <div className="education-rail" aria-hidden="true">
+                  <span className="education-rail-track" />
+                  <span className="education-rail-fill" />
+                  {education.map((entry, index) => (
+                    <div key={entry.level} className={`education-rail-step${index === 0 ? ' is-active' : ''}`}>
+                      <span className="timeline-node">{String(index + 1).padStart(2, '0')}</span>
+                      <span className="education-rail-label">{entry.level}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="education-cards">
+                  {education.map((entry) => (
+                    <article key={entry.level} className="timeline-card">
+                      <span className="timeline-level">{entry.level}</span>
+                      <h3>{entry.school}</h3>
+                      <div className="timeline-meta">
+                        <span>{entry.location}</span>
+                        <span>{entry.period}</span>
+                      </div>
+                      <p>{entry.details}</p>
+                      <small>{entry.note}</small>
+                    </article>
+                  ))}
+                </div>
+
+                <div className="education-step-count" aria-hidden="true">
+                  <span data-education-current>01</span>
+                  <span> / {String(education.length).padStart(2, '0')}</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="about-subsection skills-section">
+            <SectionHeading
+              eyebrow="Skills"
+              title="Technical interests and learning focus."
+              description="These categories reflect areas of study and practical exploration rather than formal expertise claims."
+            />
+
+            <div className="skills-grid">
+              {skills.map((skillGroup, index) => (
+                <motion.article
+                  key={skillGroup.title}
+                  className="skill-card"
+                  initial={{ opacity: 0, y: 28, z: -80, rotateX: 8, scale: 0.97 }}
+                  whileInView={{ opacity: 1, y: 0, z: 0, rotateX: 0, scale: 1 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: reducedMotion ? 0 : 0.7, ease: easeOut, delay: reducedMotion ? 0 : index * 0.08 }}
+                >
+                  <div className="skill-card-head">
+                    <span className="skill-index">0{index + 1}</span>
+                    <h3>{skillGroup.title}</h3>
+                  </div>
+                  <p>{skillGroup.description}</p>
+                  <ul className="skill-tags">
+                    {skillGroup.skills.map((skill) => (
+                      <li key={skill}>{skill}</li>
+                    ))}
+                  </ul>
+                </motion.article>
+              ))}
+            </div>
+          </section>
         </section>
 
         {!reducedMotion ? (
@@ -1030,71 +1223,6 @@ function App() {
               ) : null}
             </motion.div>
           </AnimatePresence>
-        </section>
-
-        <section id="skills" className="section skills-section">
-          <SectionHeading
-            eyebrow="Skills"
-            title="Technical interests and learning focus."
-            description="These categories reflect areas of study and practical exploration rather than formal expertise claims."
-          />
-
-          <div className="skills-grid">
-            {skills.map((skillGroup, index) => (
-              <motion.article
-                key={skillGroup.title}
-                className="skill-card"
-                initial={{ opacity: 0, y: 28, z: -80, rotateX: 8, scale: 0.97 }}
-                whileInView={{ opacity: 1, y: 0, z: 0, rotateX: 0, scale: 1 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: reducedMotion ? 0 : 0.7, ease: easeOut, delay: reducedMotion ? 0 : index * 0.08 }}
-              >
-                <div className="skill-card-head">
-                  <span className="skill-index">0{index + 1}</span>
-                  <h3>{skillGroup.title}</h3>
-                </div>
-                <p>{skillGroup.description}</p>
-                <ul className="skill-tags">
-                  {skillGroup.skills.map((skill) => (
-                    <li key={skill}>{skill}</li>
-                  ))}
-                </ul>
-              </motion.article>
-            ))}
-          </div>
-        </section>
-
-        <section id="education" className="section education-section">
-          <SectionHeading
-            eyebrow="Education"
-            title="A timeline of learning and growth."
-            description="The timeline keeps the background honest and structured without inventing unsupported details."
-          />
-
-          <div className="education-timeline">
-            {education.map((entry, index) => (
-              <motion.div
-                key={entry.level}
-                className="timeline-item"
-                initial={{ opacity: 0, x: index % 2 === 0 ? -22 : 22 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.7, ease: easeOut, delay: index * 0.12 }}
-              >
-                <div className="timeline-node" />
-                <article className="timeline-card">
-                  <span className="timeline-level">{entry.level}</span>
-                  <h3>{entry.school}</h3>
-                  <div className="timeline-meta">
-                    <span>{entry.location}</span>
-                    <span>{entry.period}</span>
-                  </div>
-                  <p>{entry.details}</p>
-                  <small>{entry.note}</small>
-                </article>
-              </motion.div>
-            ))}
-          </div>
         </section>
 
         <section id="contact" className="section contact-section">
