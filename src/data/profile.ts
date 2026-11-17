@@ -19,9 +19,9 @@ export const profile = {
     'Continuous Learning',
   ],
   location: 'Sleman, Yogyakarta',
-  email: '',
-  github: '',
-  instagram: '',
+  email: 'zainalrafihabibi@gmail.com',
+  github: 'https://github.com/zainalrafi',
+  instagram: 'https://www.instagram.com/jzenal.rh/',
   linkedin: '',
   footerNote: 'Curiosity-driven learning and practical experimentation.',
 };

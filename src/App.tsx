@@ -710,13 +710,13 @@ function App() {
     },
     {
       label: 'GitHub',
-      value: profile.github || 'GitHub placeholder',
+      value: profile.github ? 'zainalrafi' : 'GitHub placeholder',
       href: profile.github || undefined,
       icon: <GitBranch size={16} />,
     },
     {
       label: 'Instagram',
-      value: profile.instagram || 'Instagram placeholder',
+      value: profile.instagram ? '@jzenal.rh' : 'Instagram placeholder',
       href: profile.instagram || undefined,
       icon: <Network size={16} />,
     },
@@ -821,13 +821,13 @@ function App() {
 
               <h1 className="hero-title">
                 <span className="hero-line">
-                  <span className="hero-word">Curious</span>
-                  <span className="hero-word">about</span>
+                  <span className="hero-word"></span>
+                  <span className="hero-word">Hello, I'm</span>
                 </span>
                 <span className="hero-line hero-line-name">
                   <span className="hero-word">Zainal</span>
-                  <span className="hero-word">Rafi</span>
-                  <span className="hero-word">Habibi</span>
+                  <span className="hero-word">Rafi.</span>
+                  <span className="hero-word"></span>
                 </span>
               </h1>
 
