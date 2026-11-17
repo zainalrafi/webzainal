@@ -5,9 +5,9 @@ export const profile = {
   intro:
     'I am a technology enthusiast who enjoys exploring how systems work, testing ideas in practice, and learning by building.',
   bio:
-    'My interests span computer networking, Linux administration, infrastructure, and web development. I enjoy understanding the layers behind every system and turning curiosity into hands-on experiments and functional projects.',
+    'Sebagai siswa Sistem Informatika, Jaringan, dan Aplikasi (SIJA), aku memiliki ketertarikan pada dunia teknologi, khususnya networking, system administration, dan infrastructure. Aku senang mengeksplorasi hal baru, membangun solusi, serta terus mengembangkan kemampuan melalui proses belajar dan pengalaman praktik.',
   philosophy:
-    'I approach technology with a practical mindset: study the fundamentals, solve real problems, and keep improving through consistent experimentation.',
+    '',
   interests: [
     'Computer Networking',
     'Linux Administration',

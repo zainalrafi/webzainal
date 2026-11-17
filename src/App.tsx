@@ -1,7 +1,6 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import {
   ArrowRight,
-  Award,
   BriefcaseBusiness,
   ChevronRight,
   ExternalLink,
@@ -816,7 +815,7 @@ function App() {
           <div className="hero-grid">
             <div className="hero-copy">
               <p className="eyebrow">
-                Technology • Networking • Web
+                IT Enthusiast
               </p>
 
               <h1 className="hero-title">
@@ -916,8 +915,8 @@ function App() {
             <div className="about-copy">
               <SectionHeading
                 eyebrow="About"
-                title="Exploring technology through systems, practice, and continuous learning."
-                description="I enjoy understanding how things work and improving through hands-on experimentation."
+                title="About Me"
+                description=""
               />
 
               <p className="story-text">{profile.bio}</p>
@@ -947,9 +946,9 @@ function App() {
 
           <section className="about-subsection education-section">
             <SectionHeading
-              eyebrow="Education"
-              title="A timeline of learning and growth."
-              description="The timeline keeps the background honest and structured without inventing unsupported details."
+              eyebrow="Experience"
+              title="A Journey of Learning and Growth."
+              description="A collection of experiences, activities, and milestones that have shaped my journey in technology."
             />
 
             <div
@@ -1152,9 +1151,7 @@ function App() {
                     transition={{ duration: reducedMotion ? 0 : 0.7, ease: easeOut }}
                   >
                     <div className="achievement-visual">
-                      <div className="achievement-badge">
-                        <Award size={20} />
-                      </div>
+                      <img src={achievement.image} alt={`${achievement.event} certificate`} loading="lazy" />
                     </div>
                     <div className="achievement-content">
                       <div className="achievement-meta">
@@ -1164,13 +1161,12 @@ function App() {
                       <h3>{achievement.event}</h3>
                       <p>{achievement.description}</p>
                       <a
-                        href={achievement.documentUrl || '#'}
+                        href={achievement.documentUrl}
                         className="inline-link"
-                        onClick={(event) => {
-                          if (!achievement.documentUrl) event.preventDefault()
-                        }}
+                        target="_blank"
+                        rel="noreferrer"
                       >
-                        View documentation <ExternalLink size={14} />
+                        View certificate <ExternalLink size={14} />
                       </a>
                     </div>
                   </motion.article>
@@ -1207,7 +1203,7 @@ function App() {
                       onClick={() => setSelectedCertificate(certificate)}
                     >
                       <div className="certificate-visual">
-                        <span>{certificate.imageLabel}</span>
+                        <img src={certificate.image} alt={`${certificate.title} certificate`} loading="lazy" />
                       </div>
                       <div className="certificate-content">
                         <div className="certificate-meta">
@@ -1369,7 +1365,7 @@ function App() {
                 <X size={18} />
               </button>
               <div className="modal-visual certificate-visual-large">
-                <span>{selectedCertificate.imageLabel}</span>
+                <img src={selectedCertificate.image} alt={`${selectedCertificate.title} certificate`} />
               </div>
               <div className="modal-content">
                 <div className="certificate-meta">

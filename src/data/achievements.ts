@@ -1,16 +1,20 @@
+import ojmImage from '../../picture/OJM2026.jpg'
+
 export type Achievement = {
   title: string;
   event: string;
   year: string;
   description: string;
+  image: string;
   documentUrl?: string;
 };
 
 export const achievement: Achievement = {
-  title: 'Achievement Placeholder',
-  event: 'Competition or event name',
-  year: 'Year',
+  title: 'National Finalist',
+  event: 'Olimpiade Jaringan Mikrotik 2026',
+  year: '2026',
   description:
-    'This section is intentionally designed for a single achievement entry. Replace the placeholder information with your real award, competition, or recognition details when available.',
-  documentUrl: '',
+    'Finalist in the national-level MikroTik networking olympiad among vocational high schools on October 2, 2026. Certificate No. OJM/2026/11610.',
+  image: ojmImage,
+  documentUrl: ojmImage,
 };

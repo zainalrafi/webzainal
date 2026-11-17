@@ -1,27 +1,30 @@
+import mtcnaImage from '../../picture/MTCNA.jpg'
+import mtcreImage from '../../picture/MTCRE.jpg'
+
 export type Certificate = {
   title: string;
   issuer: string;
   issueDate: string;
   description: string;
-  imageLabel: string;
+  image: string;
   verificationUrl?: string;
 };
 
 export const certificates: Certificate[] = [
   {
-    title: 'Certificate Placeholder 01',
-    issuer: 'Issuing organization',
-    issueDate: 'Issue date',
-    description: 'Add your certificate information here. This placeholder is ready to be replaced with your official certificate details.',
-    imageLabel: 'Certificate 01',
-    verificationUrl: '',
+    title: 'MikroTik Certified Network Associate',
+    issuer: 'MikroTik',
+    issueDate: 'August 6, 2026',
+    description: 'Certificate No. 2608NA2938. Valid for three years from the issue date.',
+    image: mtcnaImage,
+    verificationUrl: 'https://mikrotik.com/certificates',
   },
   {
-    title: 'Certificate Placeholder 02',
-    issuer: 'Issuing organization',
-    issueDate: 'Issue date',
-    description: 'Add your second certificate information here. Keep the details clear and editable for quick updates.',
-    imageLabel: 'Certificate 02',
-    verificationUrl: '',
+    title: 'MikroTik Certified Routing Engineer',
+    issuer: 'MikroTik',
+    issueDate: 'October 23, 2026',
+    description: 'Certificate No. 2610RE1208. Valid for three years from the issue date.',
+    image: mtcreImage,
+    verificationUrl: 'https://mikrotik.com/certificates',
   },
 ];
