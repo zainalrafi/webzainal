@@ -907,8 +907,12 @@ function App() {
           >
             <div className="about-visual">
               <div className="visual-card">
-                <span className="visual-badge">Self study</span>
-                <p>Curiosity leads the process.</p>
+                <img
+                  className="visual-card-photo"
+                  src="/ID_Card%20tanpa%20bg.png"
+                  alt="Zainal Rafi Habibi"
+                />
+                <span className="visual-badge">Zainal Rafi Habibi</span>
               </div>
             </div>
 
